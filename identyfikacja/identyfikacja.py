@@ -57,7 +57,7 @@ ax.grid(visible=True)
 Identify the parameters of the unstationary system.
 '''
 
-# Time-varying parameter
+# time-varying parameter
 theta_true = np.zeros((samples, 3))
 theta_true[:, 0] = theta[0][0] + 0.3 * np.sin(0.01 * timeline) * (1 + 0.5 * np.sin(0.005 * timeline))
 
@@ -90,11 +90,11 @@ ax.grid(visible=True)
 Identification quality
 '''
 
-# mean squared residuals
-msr = np.mean((theta_true[:, 0] - thetas[:, 0, 0])**2)
+# mean squared error
+mse = np.mean((theta_true[:, 0] - thetas[:, 0, 0])**2)
 
 lambdas = np.linspace(0.9, 0.99, 100)
-msr_values = []
+mse_values = []
 
 for _lambda in lambdas:
     theta = np.zeros(3).reshape(3, 1)
@@ -107,11 +107,19 @@ for _lambda in lambdas:
         theta = theta + p @ phi_k * (y[k] - phi_k.T @ theta)
         thetas[k] = theta
 
-    msr = np.mean((theta_true[:, 0] - thetas[:, 0, 0])**2)
-    msr_values.append(msr)
+    mse = np.mean((theta_true[:, 0] - thetas[:, 0, 0])**2)
+    mse_values.append(mse)
+
+min_mse_index = np.argmin(mse_values)
+min_mse_lambda = lambdas[min_mse_index]
 
 fig, ax = plt.subplots()
-ax.plot(lambdas, msr_values)
-ax.set(xlabel='lambda', ylabel='msr', title='Identification quality depending on Lambda')
+ax.plot(lambdas, mse_values, label='mse')
+ax.axvline(min_mse_lambda, color='r', linestyle='--', label=f'optimal lambda: {min_mse_lambda:.3f}')
+ax.set(xlabel='lambda', ylabel='mse', title='Identification quality depending on Lambda')
+ax.legend()
 ax.grid(visible=True)
 plt.show()
+
+'''
+'''
